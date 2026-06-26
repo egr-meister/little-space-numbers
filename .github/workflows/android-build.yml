@@ -17,7 +17,10 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # Pin to 20.18.1 (before Node enabled require(esm) by default in 20.19),
+          # which avoids the expo-modules-core ".ts" ERR_UNKNOWN_FILE_EXTENSION
+          # crash during `expo prebuild`.
+          node-version: "20.18.1"
 
       - name: Set up Java (Temurin 17)
         uses: actions/setup-java@v4
