@@ -92,6 +92,38 @@ jobs:
           cd android
           ./gradlew bundleRelease --no-daemon
 
+      - name: Verify artifacts are RELEASE-signed (fail if debug-signed)
+        run: |
+          set -e
+          APK=$(find android/app/build/outputs/apk/release -name "*.apk" | head -1)
+          AAB=$(find android/app/build/outputs/bundle/release -name "*.aab" | head -1)
+          echo "APK: $APK"
+          echo "AAB: $AAB"
+
+          # Locate apksigner from the installed build-tools.
+          APKSIGNER=$(find "${ANDROID_SDK_ROOT:-$ANDROID_HOME}/build-tools" -name apksigner | sort | tail -1)
+          echo "apksigner: $APKSIGNER"
+
+          echo "==== APK signer certificate ===="
+          "$APKSIGNER" verify --print-certs "$APK" | tee apk-certs.txt
+
+          echo "==== AAB signer certificate ===="
+          keytool -printcert -jarfile "$AAB" | tee aab-certs.txt
+
+          # The Android debug key always has DN 'CN=Android Debug, O=Android, C=US'.
+          if grep -qiE "Android Debug" apk-certs.txt aab-certs.txt; then
+            echo "::error::Artifact is signed with the DEBUG key. Google Play will reject it."
+            exit 1
+          fi
+
+          # Confirm it carries our release identity.
+          if ! grep -qi "Little Space Numbers" apk-certs.txt; then
+            echo "::error::APK signer is not the expected Little Space Numbers release key."
+            exit 1
+          fi
+
+          echo "OK: APK and AAB are RELEASE-signed with the Little Space Numbers key."
+
       - name: Rename artifacts
         run: |
           mkdir -p dist
