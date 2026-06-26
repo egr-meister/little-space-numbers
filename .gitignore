@@ -18,8 +18,10 @@ ios/
 *.keystore
 *.jks
 *.p12
+keystore-base64.txt
 android/app/release.keystore
 
 # misc
 *.log
 .DS_Store
+*.zip
