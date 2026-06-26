@@ -62,7 +62,11 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
+          # Leading blank line: prebuild's gradle.properties may not end with a
+          # newline, so we must start on a fresh line to avoid concatenating onto
+          # the last existing property (e.g. buildToolsVersion).
           {
+            echo ""
             echo "LSN_UPLOAD_STORE_FILE=release.keystore"
             echo "LSN_UPLOAD_STORE_PASSWORD=${ANDROID_KEYSTORE_PASSWORD}"
             echo "LSN_UPLOAD_KEY_ALIAS=${ANDROID_KEY_ALIAS}"
