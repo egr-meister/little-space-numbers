@@ -30,7 +30,6 @@
       "permissions": []
     },
     "plugins": [
-      "expo-keep-awake",
       [
         "expo-build-properties",
         {
